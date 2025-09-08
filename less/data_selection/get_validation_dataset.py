@@ -43,7 +43,7 @@ def tokenize(tokenizer: PreTrainedTokenizerBase,
         tokenizer.encode(full_prompt, max_length=max_length))
     labels = torch.tensor(tokenizer.encode(full_prompt, max_length=max_length))
     labels[:len(prompt_input_ids)] = -100
-    attention_mask = [1] * len(full_input_ids)
+    attention_mask = torch.ones_like(full_input_ids)
 
     return full_input_ids, labels, attention_mask
 

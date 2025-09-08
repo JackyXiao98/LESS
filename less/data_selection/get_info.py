@@ -4,6 +4,12 @@
 
 import argparse
 import os
+
+
+os.environ.pop("NCCL_TUNER_CONFIG_PATH", None)
+os.environ.pop("NCCL_NET_PLUGIN", None)
+
+
 import pdb
 from copy import deepcopy
 from typing import Any
@@ -125,7 +131,7 @@ if isinstance(model, PeftModel):
 
 adam_optimizer_state = None
 if args.info_type == "grads" and args.gradient_type == "adam":
-    optimizer_path = os.path.join(args.model_path, "optimizer.bin")
+    optimizer_path = os.path.join(args.model_path, "optimizer.pt")
     adam_optimizer_state = torch.load(
         optimizer_path, map_location="cpu")["state"]
 

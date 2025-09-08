@@ -2,6 +2,12 @@
 # coding=utf-8
 import logging
 import os
+
+
+os.environ.pop("NCCL_TUNER_CONFIG_PATH", None)
+os.environ.pop("NCCL_NET_PLUGIN", None)
+
+
 import random
 import sys
 import time

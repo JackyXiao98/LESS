@@ -108,7 +108,7 @@ def obtain_sign_gradients(model, batch):
     return vectorized_grad_signs
 
 
-def obtain_gradients_with_adam(model, batch, avg, avg_sq):
+def obtain_gradients_with_adam(model, batch, avg, avg_sq, optimizer_state=None):
     """ obtain gradients with adam optimizer states. """
     beta1 = 0.9
     beta2 = 0.999
@@ -117,8 +117,24 @@ def obtain_gradients_with_adam(model, batch, avg, avg_sq):
     loss = model(**batch).loss
     loss.backward()
 
-    vectorized_grads = torch.cat(
-        [p.grad.view(-1) for n, p in model.named_parameters() if p.grad is not None])
+    # If optimizer_state is provided, only use parameters that match the optimizer state size
+    # This must match the parameter order used in prepare_optimizer_state
+    if optimizer_state is not None:
+        # Get trainable parameters in order
+        trainable_params = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
+        num_trainable = len(trainable_params)
+        num_optimizer_states = len(optimizer_state)
+        
+        # Use the minimum to match prepare_optimizer_state behavior
+        num_params_to_use = min(num_trainable, num_optimizer_states)
+        
+        # Concatenate gradients for the first num_params_to_use parameters
+        vectorized_grads = torch.cat(
+            [trainable_params[i][1].grad.view(-1) for i in range(num_params_to_use) 
+             if trainable_params[i][1].grad is not None])
+    else:
+        vectorized_grads = torch.cat(
+            [p.grad.view(-1) for n, p in model.named_parameters() if p.grad is not None])
 
     updated_avg = beta1 * avg + (1 - beta1) * vectorized_grads
     updated_avg_sq = beta2 * avg_sq + (1 - beta2) * vectorized_grads ** 2
@@ -128,10 +144,27 @@ def obtain_gradients_with_adam(model, batch, avg, avg_sq):
 
 
 def prepare_optimizer_state(model, optimizer_state, device):
-    names = [n for n, p in model.named_parameters() if p.requires_grad]
-    avg = torch.cat([optimizer_state[n]["exp_avg"].view(-1) for n in names])
-    avg_sq = torch.cat([optimizer_state[n]["exp_avg_sq"].view(-1)
-                       for n in names])
+    # Get trainable parameters in order
+    trainable_params = [(n, p) for n, p in model.named_parameters() if p.requires_grad]
+    
+    # optimizer_state keys are numerical indices [0, 1, 2, ...]
+    # We need to match the number of trainable parameters with optimizer state size
+    num_trainable = len(trainable_params)
+    num_optimizer_states = len(optimizer_state)
+    
+    if num_optimizer_states == 0:
+        raise ValueError("Optimizer state is empty.")
+    
+    if num_trainable != num_optimizer_states:
+        print(f"Warning: Model has {num_trainable} trainable parameters but optimizer state has {num_optimizer_states} entries.")
+        print(f"Using the minimum of both: {min(num_trainable, num_optimizer_states)}")
+    
+    # Use the minimum to avoid index errors
+    num_params_to_use = min(num_trainable, num_optimizer_states)
+    
+    # Access optimizer state using numerical indices
+    avg = torch.cat([optimizer_state[i]["exp_avg"].view(-1) for i in range(num_params_to_use)])
+    avg_sq = torch.cat([optimizer_state[i]["exp_avg_sq"].view(-1) for i in range(num_params_to_use)])
     avg = avg.to(device)
     avg_sq = avg_sq.to(device)
     return avg, avg_sq
@@ -242,7 +275,7 @@ def collect_grads(dataloader,
         if gradient_type == "adam":
             if count == 1:
                 print("Using Adam gradients")
-            vectorized_grads = obtain_gradients_with_adam(model, batch, m, v)
+            vectorized_grads = obtain_gradients_with_adam(model, batch, m, v, adam_optimizer_state)
         elif gradient_type == "sign":
             if count == 1:
                 print("Using Sign gradients")
