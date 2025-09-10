@@ -1,8 +1,10 @@
 #!/bin/bash
 
+
+# --rdzv-id=$ID --rdzv_backend c10d \
+
 ID=$RANDOM
-export header="torchrun --nproc_per_node 1 --nnodes 1 \
---rdzv-id=$ID --rdzv_backend c10d \
+export header="torchrun --nproc_per_node 8 --nnodes 1 --master_port 17238 \
 -m less.train.train"
 
 export base_training_args="--do_train True \
@@ -11,9 +13,8 @@ export base_training_args="--do_train True \
 --lr_scheduler_type linear \
 --warmup_ratio 0.03 \
 --weight_decay 0.0 \
---evaluation_strategy no \
+--eval_strategy no \
 --logging_steps 1 \
---save_strategy no \
 --num_train_epochs 4 \
 --bf16 True \
 --tf32 False \

@@ -1,4 +1,4 @@
-DATA_DIR=./data
+DATA_DIR=../data
 MODEL_PATH=meta-llama/Llama-2-7b-hf
 PERCENTAGE=0.05 # percentage of the full data to train, you can specify the training file you want to use in the script
 DATA_SEED=3

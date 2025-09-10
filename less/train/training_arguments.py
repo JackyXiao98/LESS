@@ -1,7 +1,16 @@
+from __future__ import annotations 
+
 from dataclasses import asdict, dataclass, field, fields
+from typing import Optional, Union, Any
 
 from transformers import TrainingArguments as TA
 from transformers.utils import logging
+
+# Try to import ParallelismConfig, fallback to Any if not available
+try:
+    from accelerate.utils import ParallelismConfig
+except ImportError:
+    ParallelismConfig = Any
 
 logger = logging.get_logger(__name__)
 log_levels = logging.get_log_levels_dict().copy()
@@ -53,7 +62,10 @@ fsdp_config = {
 
 @dataclass
 class TrainingArguments(TA):
-    analysis_mode: float = field(
+    parallelism_config: Any = field(
+        default=None, metadata={"help": "Configuration for parallelism."}
+    )
+    analysis_mode: bool = field(
         default=False,
         metadata={
             "help": (
@@ -69,7 +81,7 @@ class TrainingArguments(TA):
             )
         },
     )
-    train_dataset_names: str = field(
+    train_dataset_names: Optional[str] = field(
         default=None,
         metadata={
             "help": (

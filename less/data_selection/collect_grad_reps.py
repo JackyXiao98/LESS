@@ -1,5 +1,6 @@
 import json
 import os
+import pickle
 from hashlib import md5
 from typing import Iterable, List, Optional
 
@@ -173,6 +174,7 @@ def prepare_optimizer_state(model, optimizer_state, device):
 def collect_grads(dataloader,
                   model,
                   output_dir,
+                  dataset=None,
                   proj_dim: List[int] = [8192],
                   adam_optimizer_state: Optional[dict] = None,
                   gradient_type: str = "adam",
@@ -184,6 +186,7 @@ def collect_grads(dataloader,
         dataloader (torch.utils.data.DataLoader): The data loader for evaluation dataset.
         model (torch.nn.Module): The model from which gradients will be collected.
         output_dir (str): The directory where the gradients will be saved.
+        dataset: The original dataset to extract sample IDs from. If None, IDs will not be saved.
         proj_dim List[int]: The dimensions of the target projectors. Each dimension will be saved in a separate folder.
         gradient_type (str): The type of gradients to collect. [adam | sign | sgd]
         adam_optimizer_state (dict): The optimizer state of adam optimizers. If None, the gradients will be collected without considering Adam optimization states. 
@@ -205,7 +208,7 @@ def collect_grads(dataloader,
                 current_full_grads, model_id=model_id)
             projected_grads[proj_dim[i]].append(current_projected_grads.cpu())
 
-    def _save(projected_grads, output_dirs):
+    def _save(projected_grads, output_dirs, sample_ids=None):
         for dim in proj_dim:
             if len(projected_grads[dim]) == 0:
                 continue
@@ -216,6 +219,14 @@ def collect_grads(dataloader,
             torch.save(projected_grads[dim], outfile)
             print(
                 f"Saving {outfile}, {projected_grads[dim].shape}", flush=True)
+            
+            # Save corresponding sample IDs if available
+            if sample_ids is not None and len(sample_ids) > 0:
+                ids_file = os.path.join(output_dir, f"ids-{count}.pkl")
+                with open(ids_file, 'wb') as f:
+                    pickle.dump(sample_ids, f)
+                print(f"Saving {ids_file}, {len(sample_ids)} IDs", flush=True)
+            
             projected_grads[dim] = []
 
     device = next(model.parameters()).device
@@ -263,14 +274,37 @@ def collect_grads(dataloader,
     # projected_gradients
     full_grads = []  # full gradients
     projected_grads = {dim: [] for dim in proj_dim}  # projected gradients
+    sample_ids = []  # sample IDs corresponding to gradients
 
-    for batch in tqdm(dataloader, total=len(dataloader)):
+    for batch_idx, batch in enumerate(tqdm(dataloader, total=len(dataloader))):
         prepare_batch(batch)
         count += 1
 
         if count <= max_index:
             print("skipping count", count)
             continue
+
+        # Extract sample ID if dataset is provided
+        if dataset is not None:
+            # Get the actual dataset index from the sampler
+            if hasattr(dataloader.sampler, 'dataset'):
+                # For DistributedSampler, get the actual index
+                actual_indices = list(dataloader.sampler)
+                dataset_idx = actual_indices[batch_idx] if batch_idx < len(actual_indices) else batch_idx
+            else:
+                # For regular sampler
+                dataset_idx = batch_idx
+            
+            # Extract ID from the original dataset
+            if hasattr(dataset[dataset_idx], 'get') and 'id' in dataset[dataset_idx]:
+                sample_id = dataset[dataset_idx]['id']
+            elif isinstance(dataset[dataset_idx], dict) and 'id' in dataset[dataset_idx]:
+                sample_id = dataset[dataset_idx]['id']
+            else:
+                # Fallback: use dataset index as ID
+                sample_id = f"sample_{dataset_idx}"
+            
+            sample_ids.append(sample_id)
 
         if gradient_type == "adam":
             if count == 1:
@@ -294,7 +328,8 @@ def collect_grads(dataloader,
             full_grads = []
 
         if count % save_interval == 0:
-            _save(projected_grads, output_dirs)
+            _save(projected_grads, output_dirs, sample_ids if dataset is not None else None)
+            sample_ids = []  # Reset sample IDs after saving
 
         if max_samples is not None and count == max_samples:
             break
@@ -303,8 +338,9 @@ def collect_grads(dataloader,
         _project(full_grads, projected_grads)
         full_grads = []
 
-    for dim in proj_dim:
-        _save(projected_grads, output_dirs)
+    # Save any remaining gradients and IDs
+    if any(len(projected_grads[dim]) > 0 for dim in proj_dim):
+        _save(projected_grads, output_dirs, sample_ids if dataset is not None else None)
 
     torch.cuda.empty_cache()
     for dim in proj_dim:
@@ -332,6 +368,24 @@ def merge_and_normalize_info(output_dir: str, prefix="reps"):
     torch.save(merged_data, output_file)
     print(
         f"Saving the normalized {prefix} (Shape: {merged_data.shape}) to {output_file}.")
+    
+    # Merge corresponding ID files if they exist
+    if prefix == "grads":
+        id_files = [file for file in os.listdir(output_dir) if file.startswith("ids-")]
+        if id_files:
+            # Sort ID files in the same order as gradient files
+            id_files.sort(key=lambda x: int(x.split(".")[0].split("-")[1]))
+            merged_ids = []
+            for id_file in id_files:
+                with open(os.path.join(output_dir, id_file), 'rb') as f:
+                    ids = pickle.load(f)
+                    merged_ids.extend(ids)
+            
+            # Save merged IDs
+            ids_output_file = os.path.join(output_dir, "all_ids.pkl")
+            with open(ids_output_file, 'wb') as f:
+                pickle.dump(merged_ids, f)
+            print(f"Saving {len(merged_ids)} sample IDs to {ids_output_file}.")
 
 
 def merge_info(output_dir: str, prefix="reps"):
