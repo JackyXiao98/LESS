@@ -1,0 +1,20 @@
+# Requirements for MMD-based Data Mixing Optimization
+# Core dependencies
+torch>=1.9.0
+numpy>=1.21.0
+cvxpy>=1.2.0
+
+# Optional dependencies for enhanced functionality
+scipy>=1.7.0
+matplotlib>=3.5.0
+
+# Development and testing dependencies (optional)
+pytest>=6.0.0
+jupyter>=1.0.0
+
+# Note: Make sure you have a compatible CVXPY solver installed
+# CVXPY will automatically use available solvers like OSQP, ECOS, SCS
+# For better performance, you might want to install additional solvers:
+# pip install osqp
+# pip install ecos
+# pip install scs
