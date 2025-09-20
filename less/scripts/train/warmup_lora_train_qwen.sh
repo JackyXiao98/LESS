@@ -2,14 +2,19 @@
 
 source less/scripts/train/base_training_args.sh
 
-train_files=$1
+data_dir=$1
 model_path=$2
-job_name=$3
+percentage=$3
+data_seed=$4
+job_name=$5
 
 output_dir=../out/${job_name}
 if [[ ! -d $output_dir ]]; then
     mkdir -p $output_dir
 fi
+
+# 获取data_dir路径下所有的parquet文件
+train_files=($(find "$data_dir" -name "*.parquet" -type f))
 
 # use fsdp for large models
 if [[ $model_path == "meta-llama/Llama-2-13b-hf" ]]; then
@@ -23,7 +28,8 @@ fi
 training_args="$base_training_args \
 --model_name_or_path $model_path \
 --output_dir $output_dir \
+--percentage $percentage \
+--data_seed $data_seed \
 --train_files ${train_files[@]} 2>&1 | tee $output_dir/train.log"
 
-echo "$header $training_args"
 eval "$header" "$training_args"

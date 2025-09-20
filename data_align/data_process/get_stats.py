@@ -125,4 +125,8 @@ def calculate_average_token_length():
 
 
 if __name__ == "__main__":
-    calculate_average_token_length()
+    # calculate_average_token_length()
+    dataset = load_dataset("parquet",
+                           datafiles="/mnt/hdfs/selection/yingtai_sft/tulu_3_by_source/ai2-adapt-dev_flan_v2_converted.parquet",
+                           split="train")
+    breakpoint()

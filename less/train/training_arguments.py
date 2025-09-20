@@ -57,6 +57,12 @@ fsdp_config = {
         "limit_all_gathers": "true",
         "use_orig_params": "true",
     },
+    "qwen3_8b_finetune": {
+        "fsdp_transformer_layer_cls_to_wrap": ["Qwen3DecoderLayer"],
+        "fsdp_backward_prefetch": "backward_pre",
+        "limit_all_gathers": "true",
+        "use_orig_params": "true",
+    },
 }
 
 

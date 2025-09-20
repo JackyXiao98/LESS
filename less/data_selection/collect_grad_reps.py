@@ -163,9 +163,17 @@ def prepare_optimizer_state(model, optimizer_state, device):
     # Use the minimum to avoid index errors
     num_params_to_use = min(num_trainable, num_optimizer_states)
     
-    # Access optimizer state using numerical indices
-    avg = torch.cat([optimizer_state[i]["exp_avg"].view(-1) for i in range(num_params_to_use)])
-    avg_sq = torch.cat([optimizer_state[i]["exp_avg_sq"].view(-1) for i in range(num_params_to_use)])
+    # Access optimizer state - try numerical indices first, fallback to keys
+    try:
+        # Try accessing with numerical indices
+        avg = torch.cat([optimizer_state[i]["exp_avg"].view(-1) for i in range(num_params_to_use)])
+        avg_sq = torch.cat([optimizer_state[i]["exp_avg_sq"].view(-1) for i in range(num_params_to_use)])
+    except (KeyError, TypeError):
+        # If numerical indices fail, use the actual keys from optimizer_state
+        print("Warning: Numerical indices failed, using optimizer_state keys instead.")
+        keys = list(optimizer_state.keys())[:num_params_to_use]
+        avg = torch.cat([optimizer_state[key]["exp_avg"].view(-1) for key in keys])
+        avg_sq = torch.cat([optimizer_state[key]["exp_avg_sq"].view(-1) for key in keys])
     avg = avg.to(device)
     avg_sq = avg_sq.to(device)
     return avg, avg_sq

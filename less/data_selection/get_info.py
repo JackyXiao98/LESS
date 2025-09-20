@@ -186,8 +186,19 @@ def main_worker(rank, world_size, args):
     adam_optimizer_state = None
     if args.info_type == "grads" and args.gradient_type == "adam":
         optimizer_path = os.path.join(args.model_path, "optimizer.pt")
-        adam_optimizer_state = torch.load(
-            optimizer_path, map_location="cpu")["state"]
+        try:
+            # Try loading .pt file first
+            adam_optimizer_state = torch.load(
+                optimizer_path, map_location="cpu")["state"]
+        except (FileNotFoundError, RuntimeError, KeyError):
+            # If .pt file fails, try .bin file
+            optimizer_path_bin = os.path.join(args.model_path, "optimizer.bin")
+            try:
+                print(f"Warning: optimizer.pt not found or failed to load, trying optimizer.bin")
+                adam_optimizer_state = torch.load(
+                    optimizer_path_bin, map_location="cpu")["state"]
+            except (FileNotFoundError, RuntimeError, KeyError) as e:
+                raise FileNotFoundError(f"Could not load optimizer state from either optimizer.pt or optimizer.bin: {e}")
 
     # Prepare dataset
     if args.task is not None:
