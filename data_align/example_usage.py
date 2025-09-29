@@ -11,7 +11,7 @@ import torch
 import numpy as np
 import os
 
-def create_sample_data(num_sample=10000):
+def create_sample_data(num_sample=10):
     """
     Create sample gradient data for demonstration purposes.
     In practice, these would be loaded from actual gradient files.

@@ -32,10 +32,18 @@ def load_raw_dataset(train_files: Union[List[str], str], sample_size=None, sampl
     """ load raw dataset """
     if isinstance(train_files, str):
         train_files = [train_files]
-    processed_datasets = load_dataset(
-        "json",
-        data_files=train_files,
-    )["train"]
+    try:
+        processed_datasets = load_dataset(
+            "json",
+            data_files=train_files,
+        )["train"]
+    except Exception as e:
+        print(f"JSON格式读取失败: {e}")
+        print("尝试使用parquet格式读取...")
+        processed_datasets = load_dataset(
+            "parquet",
+            data_files=train_files,
+        )["train"]
     if sample_size is None:
         sample_size = int(len(processed_datasets) * sample_percentage)
 

@@ -1,0 +1,70 @@
+Cluster Mixing Weights
+==================================================
+
+Total weight: 1.000000
+
+Cluster Weights:
+------------------------------
+cluster_00: 0.108043 (10.80%, 470 points)
+cluster_01: 0.090632 ( 9.06%, 813 points)
+cluster_02: 0.115653 (11.57%, 704 points)
+cluster_03: 0.095255 ( 9.53%, 350 points)
+cluster_04: 0.084992 ( 8.50%, 617 points)
+cluster_05: 0.097443 ( 9.74%, 395 points)
+cluster_06: 0.109868 (10.99%, 309 points)
+cluster_07: 0.082376 ( 8.24%, 223 points)
+cluster_08: 0.112477 (11.25%, 639 points)
+cluster_09: 0.103260 (10.33%, 480 points)
+
+Cluster Information:
+----------------------------------------
+Cluster  0:
+  Size: 470
+  Shape: (470, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(102), np.str_('subset_2'): np.int64(84), np.str_('subset_3'): np.int64(86), np.str_('subset_4'): np.int64(92), np.str_('subset_5'): np.int64(106)}
+
+Cluster  1:
+  Size: 813
+  Shape: (813, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(160), np.str_('subset_2'): np.int64(162), np.str_('subset_3'): np.int64(155), np.str_('subset_4'): np.int64(173), np.str_('subset_5'): np.int64(163)}
+
+Cluster  2:
+  Size: 704
+  Shape: (704, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(148), np.str_('subset_2'): np.int64(139), np.str_('subset_3'): np.int64(145), np.str_('subset_4'): np.int64(123), np.str_('subset_5'): np.int64(149)}
+
+Cluster  3:
+  Size: 350
+  Shape: (350, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(74), np.str_('subset_2'): np.int64(71), np.str_('subset_3'): np.int64(70), np.str_('subset_4'): np.int64(65), np.str_('subset_5'): np.int64(70)}
+
+Cluster  4:
+  Size: 617
+  Shape: (617, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(115), np.str_('subset_2'): np.int64(116), np.str_('subset_3'): np.int64(140), np.str_('subset_4'): np.int64(120), np.str_('subset_5'): np.int64(126)}
+
+Cluster  5:
+  Size: 395
+  Shape: (395, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(81), np.str_('subset_2'): np.int64(84), np.str_('subset_3'): np.int64(76), np.str_('subset_4'): np.int64(73), np.str_('subset_5'): np.int64(81)}
+
+Cluster  6:
+  Size: 309
+  Shape: (309, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(69), np.str_('subset_2'): np.int64(60), np.str_('subset_3'): np.int64(65), np.str_('subset_4'): np.int64(51), np.str_('subset_5'): np.int64(64)}
+
+Cluster  7:
+  Size: 223
+  Shape: (223, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(39), np.str_('subset_2'): np.int64(44), np.str_('subset_3'): np.int64(46), np.str_('subset_4'): np.int64(48), np.str_('subset_5'): np.int64(46)}
+
+Cluster  8:
+  Size: 639
+  Shape: (639, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(109), np.str_('subset_2'): np.int64(146), np.str_('subset_3'): np.int64(130), np.str_('subset_4'): np.int64(142), np.str_('subset_5'): np.int64(112)}
+
+Cluster  9:
+  Size: 480
+  Shape: (480, 384)
+  Source distribution: {np.str_('subset_1'): np.int64(103), np.str_('subset_2'): np.int64(94), np.str_('subset_3'): np.int64(87), np.str_('subset_4'): np.int64(113), np.str_('subset_5'): np.int64(83)}
+

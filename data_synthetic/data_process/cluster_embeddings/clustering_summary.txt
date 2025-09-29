@@ -1,0 +1,32 @@
+Embedding Clustering Summary
+==================================================
+
+Total data points: 5000
+Number of clusters: 10
+Random seed: 42
+
+Silhouette Score: 0.0135
+Calinski-Harabasz Score: 83.59
+
+Cluster Distribution:
+------------------------------
+Cluster  0:  470 points (  9.4%)
+Cluster  1:  813 points ( 16.3%)
+Cluster  2:  704 points ( 14.1%)
+Cluster  3:  350 points (  7.0%)
+Cluster  4:  617 points ( 12.3%)
+Cluster  5:  395 points (  7.9%)
+Cluster  6:  309 points (  6.2%)
+Cluster  7:  223 points (  4.5%)
+Cluster  8:  639 points ( 12.8%)
+Cluster  9:  480 points (  9.6%)
+
+Source Distribution per Cluster:
+----------------------------------------
+col_0       0    1    2   3    4   5   6   7    8    9
+row_0                                                 
+subset_1  102  160  148  74  115  81  69  39  109  103
+subset_2   84  162  139  71  116  84  60  44  146   94
+subset_3   86  155  145  70  140  76  65  46  130   87
+subset_4   92  173  123  65  120  73  51  48  142  113
+subset_5  106  163  149  70  126  81  64  46  112   83

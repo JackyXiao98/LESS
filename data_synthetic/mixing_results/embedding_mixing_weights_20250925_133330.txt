@@ -1,0 +1,9 @@
+# Optimal Embedding Mixing Weights
+# Target: /Users/bytedance/Desktop/Github/LESS/data_synthetic/data_process/embeddings/yelp_train_sampled_1000_embeddings.pkl
+# Format: file_path,weight
+
+/Users/bytedance/Desktop/Github/LESS/data_synthetic/data_process/embeddings/yelp_huggingface_subset_4_1000_embeddings.pkl,0.229940
+/Users/bytedance/Desktop/Github/LESS/data_synthetic/data_process/embeddings/yelp_huggingface_subset_5_1000_embeddings.pkl,-0.000000
+/Users/bytedance/Desktop/Github/LESS/data_synthetic/data_process/embeddings/yelp_huggingface_subset_1_1000_embeddings.pkl,0.448163
+/Users/bytedance/Desktop/Github/LESS/data_synthetic/data_process/embeddings/yelp_huggingface_subset_3_1000_embeddings.pkl,-0.000000
+/Users/bytedance/Desktop/Github/LESS/data_synthetic/data_process/embeddings/yelp_huggingface_subset_2_1000_embeddings.pkl,0.321897

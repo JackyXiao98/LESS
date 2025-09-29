@@ -23,6 +23,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
+def get_similarity(a, b):
+    a = np.array(a)
+    b = np.array(b)
+    return np.dot(a, b)
+    # return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+
 class MMDDataMixer:
     """
     A class for computing optimal data mixing weights using MMD optimization.
@@ -32,6 +39,8 @@ class MMDDataMixer:
                  rff_dimension: int = 100,
                  sigma_bandwidth: Optional[float] = None,
                  ridge_penalty: float = 1e-7,
+                 regularization_lambda: float = 0.0,
+                 sample_number: int = -1,
                  random_seed: Optional[int] = 42,
                  auto_sigma: bool = True,
                  sigma_sample_size: int = 1000):
@@ -42,6 +51,8 @@ class MMDDataMixer:
             rff_dimension: Target dimension for Random Fourier Features space
             sigma_bandwidth: Bandwidth for the Gaussian kernel (if None and auto_sigma=True, will be computed automatically)
             ridge_penalty: Ridge penalty for numerical stability
+            regularization_lambda: L2 regularization parameter for the quadratic programming objective
+            sample_number: Number of samples to randomly select from each gradient file. If < 0, use all samples
             random_seed: Random seed for reproducibility
             auto_sigma: Whether to automatically compute sigma using median heuristic
             sigma_sample_size: Number of samples to use for sigma computation (K parameter)
@@ -49,6 +60,8 @@ class MMDDataMixer:
         self.D = rff_dimension
         self.sigma = sigma_bandwidth
         self.ridge = ridge_penalty
+        self.regularization_lambda = regularization_lambda
+        self.sample_number = sample_number
         self.random_seed = random_seed
         self.auto_sigma = auto_sigma
         self.sigma_sample_size = sigma_sample_size
@@ -85,6 +98,17 @@ class MMDDataMixer:
             
             if tensor.dim() != 2:
                 raise ValueError(f"Expected 2D tensor in {path}, got shape {tensor.shape}")
+            
+            # Apply sampling if sample_number is specified and positive
+            if self.sample_number > 0 and tensor.shape[0] > self.sample_number:
+                # Randomly sample sample_number data points
+                indices = torch.randperm(tensor.shape[0])[:self.sample_number]
+                tensor = tensor[indices]
+                logger.info(f"Sampled {self.sample_number} data points from {tensor.shape[0]} total points in {path}")
+            elif self.sample_number > 0:
+                logger.info(f"Using all {tensor.shape[0]} data points from {path} (less than sample_number={self.sample_number})")
+            else:
+                logger.info(f"Using all {tensor.shape[0]} data points from {path} (sample_number={self.sample_number})")
             
             tensors.append(tensor)
             logger.info(f"Loaded tensor with shape: {tensor.shape}")
@@ -220,6 +244,9 @@ class MMDDataMixer:
         
         # Scale and return: Z * sqrt(2/D)
         return Z * np.sqrt(2.0 / self.D)
+        
+        # check if no transform
+        # return X
     
     def compute_mean_features(self, 
                             train_tensors: List[torch.Tensor], 
@@ -276,28 +303,43 @@ class MMDDataMixer:
         # Construct matrix A (N x N): A_ij = mu_i^T @ mu_j
         A = np.zeros((N, N))
         for i in range(N):
-            for j in range(N):
-                A[i, j] = np.dot(train_means_np[i], train_means_np[j])
+            for j in range(i, N):
+                # A[i, j] = np.dot(train_means_np[i], train_means_np[j])
+                A[i, j] = get_similarity(train_means_np[i], train_means_np[j])
+                A[j, i] = A[i, j]
         
         # Add ridge penalty for numerical stability
         A = A + self.ridge * np.eye(N)
         
+        # Add L2 regularization to the quadratic form matrix
+        A = A + self.regularization_lambda * np.eye(N)
+        
         # Construct vector b (N,): b_i = mu_i^T @ mu_Q
         b = np.zeros(N)
         for i in range(N):
-            b[i] = np.dot(train_means_np[i], val_mean_np)
+            # b[i] = np.dot(train_means_np[i], val_mean_np)
+            b[i] = get_similarity(train_means_np[i], val_mean_np)
+        
+        logger.info("#"*100)
+        logger.info(f"b values: {b}")
+        logger.info("#"*100)
         
         logger.info(f"QP matrix A shape: {A.shape}")
         logger.info(f"QP vector b shape: {b.shape}")
+        logger.info(f"Regularization lambda: {self.regularization_lambda}")
         
         # Solve QP using cvxpy
+        # Original objective: minimize w^T A w - 2 b^T w
+        # With L2 regularization: minimize w^T A w - 2 b^T w + lambda * ||w||_2^2
+        # Since lambda * ||w||_2^2 = lambda * w^T w = w^T (lambda * I) w,
+        # we already added lambda * I to matrix A above
         w = cp.Variable(N)
         objective = cp.Minimize(cp.quad_form(w, A) - 2 * b.T @ w)
-        constraints = [cp.sum(w) == 1, w >= 0]
+        constraints = [cp.sum(w) == 1, w >= 0.0]
         
         problem = cp.Problem(objective, constraints)
         problem.solve(solver=cp.OSQP, verbose=False)
-        
+        # breakpoint()
         if problem.status not in ["infeasible", "unbounded"]:
             optimal_weights = w.value
             logger.info("QP solved successfully")
@@ -398,6 +440,8 @@ class MMDDataMixerRBF(MMDDataMixer):
                  rff_dimension: int = 100,  # Not used in RBF, kept for compatibility
                  sigma_bandwidth: Optional[float] = None,
                  ridge_penalty: float = 1e-7,
+                 regularization_lambda: float = 0.0,
+                 sample_number: int = -1,
                  random_seed: Optional[int] = 42,
                  auto_sigma: bool = True,
                  sigma_sample_size: int = 1000):
@@ -408,12 +452,14 @@ class MMDDataMixerRBF(MMDDataMixer):
             rff_dimension: Not used in RBF method, kept for compatibility
             sigma_bandwidth: Bandwidth for the Gaussian kernel
             ridge_penalty: Ridge penalty for numerical stability
+            regularization_lambda: L2 regularization parameter for the quadratic programming objective
+            sample_number: Number of samples to randomly select from each gradient file. If < 0, use all samples
             random_seed: Random seed for reproducibility
             auto_sigma: Whether to automatically compute sigma using median heuristic
             sigma_sample_size: Number of samples to use for sigma computation
         """
         super().__init__(rff_dimension, sigma_bandwidth, ridge_penalty, 
-                         random_seed, auto_sigma, sigma_sample_size)
+                         regularization_lambda, sample_number, random_seed, auto_sigma, sigma_sample_size)
         logger.info("Initialized MMDDataMixerRBF (using exact RBF kernel computation)")
     
     def _compute_rbf_kernel_matrix(self, X: torch.Tensor, Y: torch.Tensor = None) -> torch.Tensor:
