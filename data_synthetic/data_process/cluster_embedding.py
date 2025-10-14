@@ -80,7 +80,7 @@ class EmbeddingClusterer:
         logger.info("Loading embedding files...")
         
         # Find all yelp_huggingface_subset files
-        pattern = "yelp_huggingface_subset_*_1000_embeddings.pkl"
+        pattern = "yelp_huggingface_*.pkl"
         embedding_files = list(self.embedding_dir.glob(pattern))
         
         if not embedding_files:
@@ -413,7 +413,7 @@ def main():
                        help='Directory containing embedding .pkl files')
     parser.add_argument('--output_dir', type=str, default='./cluster_embeddings',
                        help='Directory to save clustered results')
-    parser.add_argument('--n_clusters', type=int, default=10,
+    parser.add_argument('--n_clusters', type=int, default=50,
                        help='Number of clusters for K-means')
     parser.add_argument('--random_seed', type=int, default=42,
                        help='Random seed for reproducibility')

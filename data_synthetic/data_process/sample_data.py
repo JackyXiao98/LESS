@@ -229,9 +229,9 @@ def main():
     
     # 运行采样
     sampler.run_sampling(
-        yelp_train_samples=1000,           # N=1000
-        huggingface_subsets=5,             # t=5
-        huggingface_samples_per_subset=1000 # M=1000
+        yelp_train_samples=1_000,        # N=500000
+        huggingface_subsets=1,             # t=1
+        huggingface_samples_per_subset=1_000 # M=69602
     )
 
 

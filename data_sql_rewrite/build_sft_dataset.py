@@ -181,6 +181,15 @@ class SQLDatasetProcessor(DatasetProcessor):
         if dataset_name == "spider":
             self.question_field = "question"
             self.answer_field = "query"
+        elif dataset_name == "bird":
+            self.question_field = "question"
+            self.answer_field = "SQL"
+        elif dataset_name == "gretelai":
+            self.question_field = "sql_prompt"
+            self.answer_field = "sql"
+        elif dataset_name == "ajithnarayanan":
+            self.question_field = "question"
+            self.answer_field = "sql"
         elif dataset_name == "sql_context":
             self.question_field = "question"
             self.answer_field = "answer"
@@ -495,8 +504,23 @@ def main():
             "token_budget": 50000,
             "processor": process_sql_dataset
         },
+        "bird": {
+            "huggingface_id": "birdsql/bird23-train-filtered",
+            "token_budget": 50000,
+            "processor": process_sql_dataset
+        },
+        "gretelai": {
+            "huggingface_id": "gretelai/synthetic_text_to_sql",
+            "token_budget": 50000,
+            "processor": process_sql_dataset
+        },
         "sql_context": {
             "huggingface_id": "b-mc2/sql-create-context",
+            "token_budget": 50000,
+            "processor": process_sql_dataset
+        },
+        "ajithnarayanan": {
+            "huggingface_id": "ajithnarayanan/sql",
             "token_budget": 50000,
             "processor": process_sql_dataset
         },

@@ -103,10 +103,13 @@ celerybeat.pid
 *.pt
 *.jsonl
 *.csv
-# *.pkl
-# *.png 
-# *.log
-# *.txt
+*.pkl
+*.png 
+*.log
+*.txt
+*.parquet
+*.csv
+*.zip
 
 # Environments
 .env

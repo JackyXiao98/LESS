@@ -1,32 +1,40 @@
 Embedding Clustering Summary
 ==================================================
 
-Total data points: 5000
-Number of clusters: 10
+Total data points: 70000
+Number of clusters: 20
 Random seed: 42
 
-Silhouette Score: 0.0135
-Calinski-Harabasz Score: 83.59
+Silhouette Score: 0.0217
+Calinski-Harabasz Score: 770.80
 
 Cluster Distribution:
 ------------------------------
-Cluster  0:  470 points (  9.4%)
-Cluster  1:  813 points ( 16.3%)
-Cluster  2:  704 points ( 14.1%)
-Cluster  3:  350 points (  7.0%)
-Cluster  4:  617 points ( 12.3%)
-Cluster  5:  395 points (  7.9%)
-Cluster  6:  309 points (  6.2%)
-Cluster  7:  223 points (  4.5%)
-Cluster  8:  639 points ( 12.8%)
-Cluster  9:  480 points (  9.6%)
+Cluster  0: 3766 points (  5.4%)
+Cluster  1: 4919 points (  7.0%)
+Cluster  2: 3542 points (  5.1%)
+Cluster  3: 5338 points (  7.6%)
+Cluster  4: 3451 points (  4.9%)
+Cluster  5: 4569 points (  6.5%)
+Cluster  6:  305 points (  0.4%)
+Cluster  7: 4309 points (  6.2%)
+Cluster  8: 2137 points (  3.1%)
+Cluster  9: 4312 points (  6.2%)
+Cluster 10: 2977 points (  4.3%)
+Cluster 11: 2151 points (  3.1%)
+Cluster 12: 5372 points (  7.7%)
+Cluster 13: 1746 points (  2.5%)
+Cluster 14: 3655 points (  5.2%)
+Cluster 15: 2218 points (  3.2%)
+Cluster 16: 3525 points (  5.0%)
+Cluster 17: 3631 points (  5.2%)
+Cluster 18: 4409 points (  6.3%)
+Cluster 19: 3668 points (  5.2%)
 
 Source Distribution per Cluster:
 ----------------------------------------
-col_0       0    1    2   3    4   5   6   7    8    9
-row_0                                                 
-subset_1  102  160  148  74  115  81  69  39  109  103
-subset_2   84  162  139  71  116  84  60  44  146   94
-subset_3   86  155  145  70  140  76  65  46  130   87
-subset_4   92  173  123  65  120  73  51  48  142  113
-subset_5  106  163  149  70  126  81  64  46  112   83
+col_0           0     1     2     3     4     5    6     7     8   ...    11    12    13    14    15    16    17    18    19
+row_0                                                              ...                                                      
+subset_secpe  3766  4919  3542  5338  3451  4569  305  4309  2137  ...  2151  5372  1746  3655  2218  3525  3631  4409  3668
+
+[1 rows x 20 columns]

@@ -193,7 +193,7 @@ def main():
     
     # 创建embedding生成器
     generator = EmbeddingGenerator(
-        model_name='all-MiniLM-L6-v2',  # 轻量级但效果好的模型
+        model_name='stsb-roberta-base-v2',
         batch_size=32
     )
     
